@@ -6,7 +6,11 @@ on:
 
 jobs:
   smoke-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, windows-latest, ubuntu-latest ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -16,7 +20,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 16
-      - name: Test
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
         run: |
           export DISPLAY=:90
           mkdir /home/runner/.vnc
@@ -26,4 +31,8 @@ jobs:
           mvn clean compile -f CommandLine/Modular/Maven/hellofx
           mvn javafx:run -f CommandLine/Modular/Maven/hellofx
           vncserver -kill :90
+      - name: Test (Linux)
+        run: |
+          mvn clean compile -f CommandLine/Modular/Maven/hellofx
+          mvn javafx:run -f CommandLine/Modular/Maven/hellofx
           
