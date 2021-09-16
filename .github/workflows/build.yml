@@ -11,6 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ macos-latest, windows-latest, ubuntu-latest ]
+        type: [ modular, non-modular ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -20,7 +21,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 16
-      - name: Test (Linux)
+      - name: Test Maven (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install xvfb tigervnc-standalone-server tigervnc-common
@@ -29,12 +30,29 @@ jobs:
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
-          mvn clean compile -f CommandLine/Modular/Maven/hellofx
-          mvn javafx:run -f CommandLine/Modular/Maven/hellofx
+          mvn clean compile -f ${{ matrix.type }}/maven/hellofx
+          mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
-      - name: Test
+      - name: Test Maven
         if: runner.os != 'Linux'
         run: |
-          mvn clean compile -f CommandLine/Modular/Maven/hellofx
-          mvn javafx:run -f CommandLine/Modular/Maven/hellofx
+          mvn clean compile -f ${{ matrix.type }}/maven/hellofx
+          mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
+      - name: Test Gradle (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install xvfb tigervnc-standalone-server tigervnc-common
+          export DISPLAY=:90
+          mkdir /home/runner/.vnc
+          echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
+          chmod -v 600 /home/runner/.vnc/passwd
+          vncserver :90 -localhost -nolisten tcp
+          cd ${{ matrix.type }}/gradle/hellofx
+          gradle run
+          vncserver -kill :90
+      - name: Test Gradle
+        if: runner.os != 'Linux'
+        run: |
+          cd ${{ matrix.type }}/gradle/hellofx
+          gradle run
           
