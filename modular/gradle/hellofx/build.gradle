@@ -16,7 +16,7 @@ javafx {
     modules = [ 'javafx.controls' ]
 }
 
-mainClassName = "org.openjfx.HelloFX"
+mainClassName = "org.openjfx.MainApp"
 
 
 jlink {
