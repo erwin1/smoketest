@@ -33,6 +33,7 @@ jobs:
           mvn javafx:run -f CommandLine/Modular/Maven/hellofx
           vncserver -kill :90
       - name: Test
+        if: runner.os != 'Linux'
         run: |
           mvn clean compile -f CommandLine/Modular/Maven/hellofx
           mvn javafx:run -f CommandLine/Modular/Maven/hellofx
