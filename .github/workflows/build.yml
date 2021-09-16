@@ -23,6 +23,7 @@ jobs:
       - name: Test (Linux)
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get install xvfb tigervnc-standalone-server tigervnc-common
           export DISPLAY=:90
           mkdir /home/runner/.vnc
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
@@ -31,7 +32,7 @@ jobs:
           mvn clean compile -f CommandLine/Modular/Maven/hellofx
           mvn javafx:run -f CommandLine/Modular/Maven/hellofx
           vncserver -kill :90
-      - name: Test (Linux)
+      - name: Test
         run: |
           mvn clean compile -f CommandLine/Modular/Maven/hellofx
           mvn javafx:run -f CommandLine/Modular/Maven/hellofx
