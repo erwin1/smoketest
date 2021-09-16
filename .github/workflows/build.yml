@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: openjfx/samples
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 16
+      - name: Test
+        run: |
+          mvn clean compile -f CommandLine/Modular/Maven/hellofx
+          mvn javafx:run -f CommandLine/Modular/Maven/hellofx
