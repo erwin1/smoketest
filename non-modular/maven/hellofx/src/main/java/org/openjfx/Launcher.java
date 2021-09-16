@@ -1,4 +1,4 @@
-package hellofx;
+package org.openjfx;
 
 public class Launcher {
     
