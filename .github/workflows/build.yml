@@ -22,8 +22,8 @@ jobs:
       - name: Find staging url
         id: staging
         run: |
-          cat settings.properties | grep staging_url | cut -d'=' -f2
-          echo "::set-env name=staging_url::$?"
+          STAGING_URL=cat settings.properties | grep staging_url | cut -d'=' -f2
+          echo "::set-env name=staging_url::$STAGING_URL"
       - name: Test Maven (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -37,7 +37,6 @@ jobs:
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
-        
       - name: Test Maven
         if: runner.os != 'Linux'
         run: |
