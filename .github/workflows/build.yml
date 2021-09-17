@@ -23,7 +23,7 @@ jobs:
         id: staging
         run: |
           STAGING_URL=cat settings.properties | grep staging_url | cut -d'=' -f2
-          echo ::set-output name=staging_url::$STAGING_URL"
+          echo ::set-output name=staging_url::$STAGING_URL
       - name: Test Maven (Linux)
         if: runner.os == 'Linux'
         run: |
