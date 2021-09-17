@@ -86,6 +86,7 @@ jobs:
         run: |
           SDK_VERSION=`cat settings.properties | grep sdk_version | cut -d'=' -f2`
           echo ::set-output name=sdk_version::$SDK_VERSION
+        shell: bash
       - name: Find Platform
         id: platform
         run: |
@@ -105,15 +106,15 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.sdk_version }}/openjfx-${{ env.sdk_version }}_${{ env.platform }}-x64_bin-sdk.zip
-          unzip /tmp/openjfx-${{ env.sdk_version }}_${{ env.platform }}-x64_bin-jmods.zip -d /tmp
+          unzip /tmp/openjfx-${{ env.sdk_version }}_${{ env.platform }}-x64_bin-sdk.zip -d /tmp
         env:
           sdk_version: ${{ steps.sdk.outputs.sdk_version }}
           platform: ${{ steps.platform.outputs.platform }}
       - name: Setup JavaFX (Windows)
         if: runner.os == 'Windows'
         run: |
-          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.sdk_version }}/openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip
-          Expand-Archive -Force D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip D:\
+          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.sdk_version }}/openjfx-${{ env.sdk_version }}_windows-x64_bin-sdk.zip D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-sdk.zip
+          Expand-Archive -Force D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-sdk.zip D:\
         env:
           sdk_version: ${{ steps.sdk.outputs.sdk_version }}
       - name: Test Gradle (Linux)
