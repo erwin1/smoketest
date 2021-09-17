@@ -89,7 +89,7 @@ jobs:
       - name: Find Platform
         id: platform
         run: |
-          OS = ${{ matrix.os }}
+          OS=${{ matrix.os }}
           SDK=/tmp/javafx-sdk-${{ steps.sdk.outputs.sdk_version }}
           if [[ "$OS" == "macos-latest" ]]; then
             echo ::set-output name=platform::osx
