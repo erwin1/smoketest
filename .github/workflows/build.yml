@@ -23,7 +23,7 @@ jobs:
         id: staging
         run: |
           STAGING_URL=cat settings.properties | grep staging_url | cut -d'=' -f2
-          echo "::set-env name=staging_url::$STAGING_URL"
+          echo ::set-output name=staging_url::$STAGING_URL"
       - name: Test Maven (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -37,12 +37,16 @@ jobs:
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
+        env:
+          staging_url: steps.staging.outputs.staging_url
       - name: Test Maven
         if: runner.os != 'Linux'
         run: |
           mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
+        env:
+          staging_url: steps.staging.outputs.staging_url
       - name: Test Gradle (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -53,9 +57,13 @@ jobs:
           cd ${{ matrix.type }}/gradle/hellofx
           gradle run -Pstaging=${{ env.staging_url }}
           vncserver -kill :90
+        env:
+          staging_url: steps.staging.outputs.staging_url
       - name: Test Gradle
         if: runner.os != 'Linux'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
           gradle run -Pstaging=${{ env.staging_url }}
+        env:
+          staging_url: steps.staging.outputs.staging_url
           
