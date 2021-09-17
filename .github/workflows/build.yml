@@ -38,7 +38,7 @@ jobs:
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
         env:
-          staging_url: steps.staging.outputs.staging_url
+          staging_url: ${{ steps.staging.outputs.staging_url }}
       - name: Test Maven
         if: runner.os != 'Linux'
         run: |
@@ -46,7 +46,7 @@ jobs:
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
         env:
-          staging_url: steps.staging.outputs.staging_url
+          staging_url: ${{ steps.staging.outputs.staging_url }}
       - name: Test Gradle (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -58,12 +58,12 @@ jobs:
           gradle run -Pstaging=${{ env.staging_url }}
           vncserver -kill :90
         env:
-          staging_url: steps.staging.outputs.staging_url
+          staging_url: ${{ steps.staging.outputs.staging_url }}
       - name: Test Gradle
         if: runner.os != 'Linux'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
           gradle run -Pstaging=${{ env.staging_url }}
         env:
-          staging_url: steps.staging.outputs.staging_url
+          staging_url: ${{ steps.staging.outputs.staging_url }}
           
