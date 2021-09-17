@@ -12,6 +12,7 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>17.0.0.1</javafx.version>
         <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
+        <staging.repo.url>https://oss.sonatype.org/service/local/repositories/orgopenjfx-1148/content</staging.repo.url>
     </properties>
 
   <name>hellofx</name>
@@ -19,7 +20,7 @@
     <repositories>
         <repository>
             <id>staging</id>
-            <url>https://oss.sonatype.org/service/local/repositories/orgopenjfx-1148/content</url>
+            <url>${staging.repo.url}</url>
         </repository>
     </repositories>
   
@@ -29,27 +30,6 @@
       <artifactId>javafx-controls</artifactId>
       <version>${javafx.version}</version>
     </dependency>
-    <!-- Uncomment for cross-platform fat jar-->
-    <!--
-      <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-graphics</artifactId>
-        <version>${javafx.version}</version>
-        <classifier>win</classifier>
-    </dependency>
-    <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-graphics</artifactId>
-        <version>${javafx.version}</version>
-        <classifier>linux</classifier>
-    </dependency>
-    <dependency>
-        <groupId>org.openjfx</groupId>
-        <artifactId>javafx-graphics</artifactId>
-        <version>${javafx.version}</version>
-        <classifier>mac</classifier>
-    </dependency>
-    -->
   </dependencies>
   
   <build>
@@ -70,30 +50,6 @@
                   <mainClass>org.openjfx.Launcher</mainClass>
               </configuration>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.0</version>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>shade</goal>
-                    </goals>
-                    <configuration>
-                        <shadedArtifactAttached>true</shadedArtifactAttached>
-                        <shadedClassifierName>project-classifier</shadedClassifierName>
-                        <outputFile>shade\${project.artifactId}.jar</outputFile>
-                        <transformers>
-                            <transformer implementation=
-                                                 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                <mainClass>org.openjfx.Launcher</mainClass>
-                            </transformer>
-                        </transformers>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
     </plugins>
   </build>
 </project>

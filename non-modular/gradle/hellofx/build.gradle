@@ -4,6 +4,9 @@ plugins {
 }
 
 repositories {
+    maven {
+        url = project.hasProperty('staging') ? project.property('staging') : ''
+    }
     mavenCentral()
 }
 
@@ -13,12 +16,3 @@ javafx {
 }
 
 mainClassName = 'org.openjfx.Launcher'
-
-jar {
-    manifest {
-        attributes 'Main-Class': 'org.openjfx.Launcher'
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}

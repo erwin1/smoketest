@@ -6,7 +6,7 @@ plugins {
 
 repositories {
     maven {
-        url 'https://oss.sonatype.org/content/repositories/orgopenjfx-1148/'
+        url = project.hasProperty('staging') ? project.property('staging') : ''
     }
     mavenCentral()
 }
@@ -17,11 +17,3 @@ javafx {
 }
 
 mainClassName = "org.openjfx.MainApp"
-
-
-jlink {
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    launcher {
-        name = 'hellofx'
-    }
-}

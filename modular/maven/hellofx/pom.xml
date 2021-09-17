@@ -14,12 +14,20 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>17.0.0.1</javafx.version>
         <javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
+        <staging.repo.url>https://oss.sonatype.org/service/local/repositories/orgopenjfx-1148/content</staging.repo.url>
     </properties>
 
     <organization>
         <!-- Used as the 'Vendor' for JNLP generation -->
         <name>Your Organisation</name>
     </organization>
+
+    <repositories>
+        <repository>
+            <id>staging</id>
+            <url>${staging.repo.url}</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -43,15 +51,6 @@
                     <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jlink-plugin</artifactId>
-                <version>3.1.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <launcher>launcher=hellofx/org.openjfx.MainApp</launcher>
-                </configuration>
-            </plugin>-->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>

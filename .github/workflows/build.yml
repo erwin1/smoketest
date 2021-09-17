@@ -19,6 +19,11 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 16
+      - name: Find staging url
+        id: staging
+        run: |
+          cat settings.properties | grep staging_url | cut -d'=' -f2
+          echo "::set-env name=staging_url::$?"
       - name: Test Maven (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -28,12 +33,15 @@ jobs:
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
+          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
+        
       - name: Test Maven
         if: runner.os != 'Linux'
         run: |
+          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
       - name: Test Gradle (Linux)
@@ -44,11 +52,11 @@ jobs:
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run
+          gradle run -Pstaging=${{ env.staging_url }}
           vncserver -kill :90
       - name: Test Gradle
         if: runner.os != 'Linux'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run
+          gradle run -Pstaging=${{ env.staging_url }}
           
