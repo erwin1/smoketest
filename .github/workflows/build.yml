@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  smoke-test:
+  maven-central:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -67,4 +67,71 @@ jobs:
           gradle run -Pstaging=${{ env.staging_url }}
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
-          
+  sdk:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-latest, windows-latest, ubuntu-latest ]
+        type: [ modular, non-modular ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: 16
+      - name: Find SDK version
+        id: sdk
+        run: |
+          SDK_VERSION=`cat settings.properties | grep sdk_version | cut -d'=' -f2`
+          echo ::set-output name=sdk_version::$SDK_VERSION
+      - name: Find Platform
+        id: platform
+        run: |
+          OS = ${{ matrix.os }}
+          SDK=/tmp/javafx-sdk-${{ steps.sdk.outputs.sdk_version }}
+          if [[ "$OS" == "macos-latest" ]]; then
+            echo ::set-output name=platform::osx
+          elif [[ "$OS" == "windows-latest" ]]; then
+            echo ::set-output name=platform::windows
+            SDK=D:\javafx-sdk-${{ steps.sdk.outputs.sdk_version }}
+          else
+            echo ::set-output name=platform::linux
+          fi
+          echo ::set-output name=javafx::$SDK
+        shell: bash
+      - name: Setup JavaFX
+        if: runner.os != 'Windows'
+        run: |
+          wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.sdk_version }}/openjfx-${{ env.sdk_version }}_${{ env.platform }}-x64_bin-sdk.zip
+          unzip /tmp/openjfx-${{ env.sdk_version }}_${{ env.platform }}-x64_bin-jmods.zip -d /tmp
+        env:
+          sdk_version: ${{ steps.sdk.outputs.sdk_version }}
+          platform: ${{ steps.platform.outputs.platform }}
+      - name: Setup JavaFX (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.sdk_version }}/openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip
+          Expand-Archive -Force D:\openjfx-${{ env.sdk_version }}_windows-x64_bin-jmods.zip D:\
+        env:
+          sdk_version: ${{ steps.sdk.outputs.sdk_version }}
+      - name: Test Gradle (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          export DISPLAY=:90
+          echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
+          chmod -v 600 /home/runner/.vnc/passwd
+          vncserver :90 -localhost -nolisten tcp
+          cd ${{ matrix.type }}/gradle/hellofx
+          gradle run -Psdk=${{ env.JAVAFX_HOME }}
+          vncserver -kill :90
+        env:
+          JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
+      - name: Test Gradle
+        if: runner.os != 'Linux'
+        run: |
+          cd ${{ matrix.type }}/gradle/hellofx
+          gradle run -Psdk=${{ env.JAVAFX_HOME }}
+        env:
+          JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}

@@ -12,7 +12,11 @@ repositories {
 }
 
 javafx {
-    version = '17.0.0.1'
+    if (project.hasProperty('sdk')) {
+        sdk = project.property('sdk')
+    } else {
+        version = '17.0.0.1'
+    }
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
