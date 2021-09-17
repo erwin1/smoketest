@@ -33,7 +33,7 @@ jobs:
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
-          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
@@ -42,7 +42,7 @@ jobs:
       - name: Test Maven
         if: runner.os != 'Linux'
         run: |
-          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty=javafx.maven.plugin.version -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
         env:
