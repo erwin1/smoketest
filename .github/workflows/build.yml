@@ -120,6 +120,7 @@ jobs:
       - name: Test Gradle (Linux)
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get install xvfb tigervnc-standalone-server tigervnc-common
           export DISPLAY=:90
           mkdir /home/runner/.vnc
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
