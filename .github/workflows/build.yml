@@ -162,15 +162,18 @@ jobs:
         run: |
           OS=${{ matrix.os }}
           JMOD=/tmp/javafx-jmods-${{ steps.sdk.outputs.jmod_version }}
+          RUNTIME=target/runtime/bin/java
           if [[ "$OS" == "macos-latest" ]]; then
             echo ::set-output name=platform::osx
           elif [[ "$OS" == "windows-latest" ]]; then
             echo ::set-output name=platform::windows
             JMOD=D:\\javafx-jmods-${{ steps.sdk.outputs.jmod_version }}\\
+            RUNTIME=target\runtime\bin\java
           else
             echo ::set-output name=platform::linux
           fi
           echo ::set-output name=javafx::$JMOD
+          echo ::set-output name=runtime::$RUNTIME
         shell: bash
       - name: Test JMODS
         if: runner.os != 'Windows'
@@ -199,6 +202,7 @@ jobs:
           --output target/runtime
           --strip-debug --compress 2 --no-header-files --no-man-pages
 
-          target/runtime/bin/java -m hellofx/org.openjfx.MainApp
+          ${{ env.RUNTIME }} -m hellofx/org.openjfx.MainApp
         env:
           JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
+          RUNTIME: ${{ steps.platform.outputs.runtime }}
