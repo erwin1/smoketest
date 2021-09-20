@@ -144,7 +144,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ macos-latest, windows-latest, ubuntu-latest ]
-        type: [ modular, non-modular ]
     steps:
       - uses: actions/checkout@v2
       - name: Setup java
@@ -173,23 +172,11 @@ jobs:
           fi
           echo ::set-output name=javafx::$JMOD
         shell: bash
-      - name: Setup JavaFX
+      - name: Test JMODS
         if: runner.os != 'Windows'
         run: |
           wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip
           unzip /tmp/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip -d /tmp
-        env:
-          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
-          platform: ${{ steps.platform.outputs.platform }}
-      - name: Setup JavaFX (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_windows-x64_bin-sdk.zip D:\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip
-          Expand-Archive -Force D:\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip D:\
-        env:
-          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
-      - name: Test JMODS
-        run: |
           cd modular/maven/hellofx
           mvn package
           ${{ env.JAVA_HOME }}/bin/jlink \
@@ -199,4 +186,22 @@ jobs:
           --strip-debug --compress 2 --no-header-files --no-man-pages
           target/runtime/bin/java -m hellofx/org.openjfx.MainApp
         env:
+          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
+          platform: ${{ steps.platform.outputs.platform }}
+          JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
+      - name: Test JMODS (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip D:\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip
+          Expand-Archive -Force D:\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip D:\
+          cd modular\maven\hellofx
+          mvn package
+          ${{ env.JAVA_HOME }}\bin\jlink ^
+          --module-path ${{ env.JAVAFX_HOME }}:target/hellofx-1.0-SNAPSHOT.jar ^
+          --add-modules javafx.fxml,javafx.controls,hellofx ^
+          --output target/runtime ^
+          --strip-debug --compress 2 --no-header-files --no-man-pages
+          target\runtime\bin\java -m hellofx/org.openjfx.MainApp
+        env:
+          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
           JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
