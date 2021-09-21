@@ -215,7 +215,7 @@ jobs:
           cd modular\maven\hellofx
           mvn -q package
           ${{ env.JAVA_HOME }}/bin/jlink `
-          --module-path ${{ env.JMOD_HOME }};target/hellofx-1.0-SNAPSHOT.jar `
+          --module-path "${{ env.JMOD_HOME }};target/hellofx-1.0-SNAPSHOT.jar" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
           --output ${{ env.RUNTIME }} `
           --strip-debug --compress 2 --no-header-files --no-man-pages
