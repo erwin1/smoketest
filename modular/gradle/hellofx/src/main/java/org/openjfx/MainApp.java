@@ -12,6 +12,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        System.out.println("Starting Application...");
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
         
         Scene scene = new Scene(root);
@@ -23,7 +24,10 @@ public class MainApp extends Application {
 
         if (System.getProperty("javafx.platform") == null) {
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
-            pause.setOnFinished(f -> System.exit(0));
+            pause.setOnFinished(f -> {
+                System.out.println("Closing Application...");
+                System.exit(0);
+            });
             pause.play();
         }
     }
