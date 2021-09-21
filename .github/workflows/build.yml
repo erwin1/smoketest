@@ -193,19 +193,56 @@ jobs:
           Expand-Archive -Force ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}
         env:
           jmod_version: ${{ steps.jmod.outputs.jmod_version }}
-      - name: Test JMODS
-        run: >
+      - name: Test JMODS (MacOS)
+        if: runner.os == 'macOS'
+        run: |
           cd modular/maven/hellofx
-
           mvn -q package
-
-          ${{ env.JAVA_HOME }}/bin/jlink
-          --module-path ${{ env.JMOD_HOME }};target/hellofx-1.0-SNAPSHOT.jar
-          --add-modules javafx.fxml,javafx.controls,hellofx
-          --output ${{ env.RUNTIME }}
+          ${{ env.JAVA_HOME }}/bin/jlink \
+          --module-path ${{ env.JMOD_HOME }}:target/hellofx-1.0-SNAPSHOT.jar \
+          --add-modules javafx.fxml,javafx.controls,hellofx \
+          --output ${{ env.RUNTIME }} \
           --strip-debug --compress 2 --no-header-files --no-man-pages
-
           ${{ env.JAVA_RUNTIME }} -m hellofx/org.openjfx.MainApp
+        env:
+          RUNTIME: ${{ steps.platform.outputs.runtime }}
+          JAVA_RUNTIME: ${{ steps.platform.outputs.java_runtime }}
+          JMOD_HOME: ${{ steps.platform.outputs.jmod_home }}
+
+      - name: Test JMODS (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd modular\maven\hellofx
+          mvn -q package
+          ${{ env.JAVA_HOME }}/bin/jlink ^
+          --module-path ${{ env.JMOD_HOME }};target/hellofx-1.0-SNAPSHOT.jar ^
+          --add-modules javafx.fxml,javafx.controls,hellofx ^
+          --output ${{ env.RUNTIME }} ^
+          --strip-debug --compress 2 --no-header-files --no-man-pages
+          ${{ env.JAVA_RUNTIME }} -m hellofx/org.openjfx.MainApp
+        env:
+          RUNTIME: ${{ steps.platform.outputs.runtime }}
+          JAVA_RUNTIME: ${{ steps.platform.outputs.java_runtime }}
+          JMOD_HOME: ${{ steps.platform.outputs.jmod_home }}   
+
+      - name: Test JMODS (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cd modular/maven/hellofx
+          mvn -q package
+          ${{ env.JAVA_HOME }}/bin/jlink \
+          --module-path ${{ env.JMOD_HOME }}:target/hellofx-1.0-SNAPSHOT.jar \
+          --add-modules javafx.fxml,javafx.controls,hellofx \
+          --output ${{ env.RUNTIME }} \
+          --strip-debug --compress 2 --no-header-files --no-man-pages
+          sudo apt-get install xvfb tigervnc-standalone-server tigervnc-common
+          export DISPLAY=:90
+          mkdir /home/runner/.vnc
+          echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
+          chmod -v 600 /home/runner/.vnc/passwd
+          vncserver :90 -localhost -nolisten tcp
+          ${{ env.JAVA_RUNTIME }} -m hellofx/org.openjfx.MainApp
+          vncserver -kill :90
         env:
           RUNTIME: ${{ steps.platform.outputs.runtime }}
           JAVA_RUNTIME: ${{ steps.platform.outputs.java_runtime }}
