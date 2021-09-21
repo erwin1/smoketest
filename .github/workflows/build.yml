@@ -214,6 +214,9 @@ jobs:
         run: |
           cd modular\maven\hellofx
           mvn -q package
+          ls D:\a\_temp
+          echo 'OK'
+          ls D:\a\_temp\javafx-jmods-17
           ${{ env.JAVA_HOME }}\bin\jlink `
           --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
