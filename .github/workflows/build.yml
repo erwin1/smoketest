@@ -172,14 +172,20 @@ jobs:
           echo ::set-output name=jmod_home::$JMOD_HOME
         shell: bash
       - name: Setup JavaFX
+        if: runner.os != 'Windows'
         run: |
-          sudo apt-get update && sudo apt-get install wget
           wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip
           unzip /tmp/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip -d ${{ runner.temp }}
         env:
           jmod_version: ${{ steps.jmod.outputs.jmod_version }}
           platform: ${{ steps.platform.outputs.platform }}
-        shell: bash
+      - name: Setup JavaFX (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip
+          Expand-Archive -Force ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}
+        env:
+          jmod_version: ${{ steps.jmod.outputs.jmod_version }}
       - name: Test JMODS
         run: >
           cd modular/maven/hellofx
