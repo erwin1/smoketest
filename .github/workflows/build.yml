@@ -173,6 +173,7 @@ jobs:
         shell: bash
       - name: Setup JavaFX
         run: |
+          sudo apt-get update && sudo apt-get install wget
           wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip
           unzip /tmp/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip -d ${{ runner.temp }}
         env:
