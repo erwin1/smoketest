@@ -161,7 +161,7 @@ jobs:
         id: platform
         run: |
           OS=${{ matrix.os }}
-          JMOD_HOME=${{ runner.temp }}/javafx-jmods-${{ steps.sdk.outputs.jmod_version }}
+          JMOD_HOME=${{ runner.temp }}/javafx-jmods-${{ steps.jmod.outputs.jmod_version }}
           if [[ "$OS" == "macos-latest" ]]; then
             echo ::set-output name=platform::osx
           elif [[ "$OS" == "windows-latest" ]]; then
@@ -177,7 +177,7 @@ jobs:
           wget -P /tmp https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip
           unzip /tmp/openjfx-${{ env.jmod_version }}_${{ env.platform }}-x64_bin-jmods.zip -d /tmp
         env:
-          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
+          jmod_version: ${{ steps.jmod.outputs.jmod_version }}
           platform: ${{ steps.platform.outputs.platform }}
       - name: Setup JavaFX (Windows)
         if: runner.os == 'Windows'
@@ -185,7 +185,7 @@ jobs:
           bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip
           Expand-Archive -Force ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}
         env:
-          jmod_version: ${{ steps.sdk.outputs.jmod_version }}
+          jmod_version: ${{ steps.jmod.outputs.jmod_version }}
       - name: Test JMODS
         run: >
           cd modular/maven/hellofx
@@ -201,4 +201,4 @@ jobs:
           ${{ env.RUNTIME }} -m hellofx/org.openjfx.MainApp
         env:
           RUNTIME: target/runtime
-          JMOD_HOME: ${{ steps.sdk.outputs.jmod_home }}
+          JMOD_HOME: ${{ steps.platform.outputs.jmod_home }}
