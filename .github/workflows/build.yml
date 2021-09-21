@@ -162,14 +162,21 @@ jobs:
         run: |
           OS=${{ matrix.os }}
           JMOD_HOME=${{ runner.temp }}/javafx-jmods-${{ steps.jmod.outputs.jmod_version }}
+          RUNTIME=target/runtime
+          JAVA_RUNTIME=$RUNTIME/bin/java
           if [[ "$OS" == "macos-latest" ]]; then
             echo ::set-output name=platform::osx
           elif [[ "$OS" == "windows-latest" ]]; then
             echo ::set-output name=platform::windows
+            JMOD_HOME=${{ runner.temp }}\\javafx-jmods-${{ steps.jmod.outputs.jmod_version }}
+            RUNTIME=target\\runtime
+            JAVA_RUNTIME=$RUNTIME\\bin\\java
           else
             echo ::set-output name=platform::linux
           fi
           echo ::set-output name=jmod_home::$JMOD_HOME
+          echo ::set-output name=runtime::$RUNTIME
+          echo ::set-output name=java_runtime::$JAVA_RUNTIME
         shell: bash
       - name: Setup JavaFX
         if: runner.os != 'Windows'
@@ -198,7 +205,8 @@ jobs:
           --output ${{ env.RUNTIME }}
           --strip-debug --compress 2 --no-header-files --no-man-pages
 
-          ${{ env.RUNTIME }}/bin/java -m hellofx/org.openjfx.MainApp
+          ${{ env.JAVA_RUNTIME }} -m hellofx/org.openjfx.MainApp
         env:
-          RUNTIME: target/runtime
+          RUNTIME: ${{ steps.platform.outputs.runtime }}
+          JAVA_RUNTIME: ${{ steps.platform.outputs.java_runtime }}
           JMOD_HOME: ${{ steps.platform.outputs.jmod_home }}
