@@ -191,7 +191,7 @@ jobs:
           --output ${{ env.RUNTIME }}
           --strip-debug --compress 2 --no-header-files --no-man-pages
 
-          ${{ env.RUNTIME }} -m hellofx/org.openjfx.MainApp
+          ${{ env.RUNTIME }}/bin/java -m hellofx/org.openjfx.MainApp
         env:
           RUNTIME: target/runtime
           JMOD_HOME: ${{ steps.platform.outputs.jmod_home }}
