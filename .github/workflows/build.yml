@@ -168,7 +168,7 @@ jobs:
             echo ::set-output name=platform::osx
           elif [[ "$OS" == "windows-latest" ]]; then
             echo ::set-output name=platform::windows
-            JMOD_HOME=${{ runner.temp }}\\javafx-jmods-${{ steps.jmod.outputs.jmod_version }}
+            JMOD_HOME=D:\\javafx-jmods-${{ steps.jmod.outputs.jmod_version }}
             RUNTIME=target\\runtime
             JAVA_RUNTIME=$RUNTIME\\bin\\java
           else
@@ -190,7 +190,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           bitsadmin /Transfer DownloadJavaFX https://download2.gluonhq.com/openjfx/${{ env.jmod_version }}/openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip
-          Expand-Archive -Force ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip ${{ runner.temp }}
+          Expand-Archive -Force ${{ runner.temp }}\openjfx-${{ env.jmod_version }}_windows-x64_bin-jmods.zip D:\
         env:
           jmod_version: ${{ steps.jmod.outputs.jmod_version }}
       - name: Test JMODS (MacOS)
@@ -214,9 +214,6 @@ jobs:
         run: |
           cd modular\maven\hellofx
           mvn -q package
-          ls D:\a\_temp
-          echo 'OK'
-          ls D:\a\_temp\javafx-jmods-17
           ${{ env.JAVA_HOME }}\bin\jlink `
           --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
