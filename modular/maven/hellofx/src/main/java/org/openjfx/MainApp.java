@@ -22,6 +22,10 @@ public class MainApp extends Application {
         stage.setScene(scene);
         stage.show();
 
+        String javaVersion = System.getProperty("java.version");
+        String javafxVersion = System.getProperty("javafx.version");
+        System.out.println("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
+
         if (System.getProperty("javafx.platform") == null) {
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
             pause.setOnFinished(f -> {

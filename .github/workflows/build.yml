@@ -23,7 +23,9 @@ jobs:
         id: staging
         run: |
           STAGING_URL=`cat settings.properties | grep staging_url | cut -d'=' -f2`
+          MAVEN_VERSION=`cat settings.properties | grep maven_version | cut -d'=' -f2`
           echo ::set-output name=staging_url::$STAGING_URL
+          echo ::set-output name=maven_version::$MAVEN_VERSION
         shell: bash
       - name: Test Maven (Linux)
         if: runner.os == 'Linux'
@@ -34,20 +36,34 @@ jobs:
           echo 123456 | vncpasswd -f > /home/runner/.vnc/passwd
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
-          mvn versions:set-property -Dproperty=staging.repo.url -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn -q versions:set-property -Dproperty=staging.repo.url -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn -q versions:set-property -Dproperty=javafx.version -DnewVersion=${{ env.maven_version }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
           vncserver -kill :90
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
-      - name: Test Maven
-        if: runner.os != 'Linux'
+          maven_version: ${{ steps.staging.outputs.maven_version }}
+      - name: Test Maven (Mac)
+        if: runner.os == 'macOS'
         run: |
-          mvn versions:set-property -Dproperty=staging.repo.url -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn -q versions:set-property -Dproperty=staging.repo.url -DnewVersion=${{ env.staging_url }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn -q versions:set-property -Dproperty=javafx.version -DnewVersion=${{ env.maven_version }} -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
           mvn clean compile -f ${{ matrix.type }}/maven/hellofx
           mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
+          maven_version: ${{ steps.staging.outputs.maven_version }}
+      - name: Test Maven (Windows)
+        if: runner.os == 'windows'
+        run: |
+          mvn -q versions:set-property -Dproperty="staging.repo.url" -DnewVersion="${{ env.staging_url }}" -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn -q versions:set-property -Dproperty="javafx.version" -DnewVersion="${{ env.maven_version }}" -DgenerateBackupPoms=false -f ${{ matrix.type }}/maven/hellofx
+          mvn clean compile -f ${{ matrix.type }}/maven/hellofx
+          mvn javafx:run -f ${{ matrix.type }}/maven/hellofx
+        env:
+          staging_url: ${{ steps.staging.outputs.staging_url }}
+          maven_version: ${{ steps.staging.outputs.maven_version }}
       - name: Test Gradle (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -56,17 +72,27 @@ jobs:
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run -Pstaging=${{ env.staging_url }}
+          ./gradlew run -Pstaging=${{ env.staging_url }} -Pjavafx_version=${{ env.maven_version }}
           vncserver -kill :90
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
-      - name: Test Gradle
-        if: runner.os != 'Linux'
+          maven_version: ${{ steps.staging.outputs.maven_version }}
+      - name: Test Gradle (Mac)
+        if: runner.os == 'macOS'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run -Pstaging=${{ env.staging_url }}
+          ./gradlew run -Pstaging=${{ env.staging_url }} -Pjavafx_version=${{ env.maven_version }}
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
+          maven_version: ${{ steps.staging.outputs.maven_version }}
+      - name: Test Gradle (Windows)
+        if: runner.os == 'windows'
+        run: |
+          cd ${{ matrix.type }}/gradle/hellofx
+          .\gradlew run -Pstaging="${{ env.staging_url }}" -Pjavafx_version="${{ env.maven_version }}"
+        env:
+          staging_url: ${{ steps.staging.outputs.staging_url }}
+          maven_version: ${{ steps.staging.outputs.maven_version }}
   sdk:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -127,15 +153,22 @@ jobs:
           chmod -v 600 /home/runner/.vnc/passwd
           vncserver :90 -localhost -nolisten tcp
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run -Psdk=${{ env.JAVAFX_HOME }}
+          ./gradlew run -Psdk=${{ env.JAVAFX_HOME }}
           vncserver -kill :90
         env:
           JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
-      - name: Test Gradle
-        if: runner.os != 'Linux'
+      - name: Test Gradle (MacOS)
+        if: runner.os == 'macOS'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run -Psdk=${{ env.JAVAFX_HOME }}
+          ./gradlew run -Psdk=${{ env.JAVAFX_HOME }}
+        env:
+          JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
+      - name: Test Gradle (Windows)
+        if: runner.os == 'windows'
+        run: |
+          cd ${{ matrix.type }}/gradle/hellofx
+          .\gradlew run -Psdk="${{ env.JAVAFX_HOME }}"
         env:
           JAVAFX_HOME: ${{ steps.platform.outputs.javafx }}
   jmod:
@@ -197,9 +230,10 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cd modular/maven/hellofx
-          mvn -q package
+          javac --module-path ${{ env.JMOD_HOME }} -d mods $(find src -name "*.java")
+          cp -r src/main/resources/* mods
           ${{ env.JAVA_HOME }}/bin/jlink \
-          --module-path ${{ env.JMOD_HOME }}:target/hellofx-1.0-SNAPSHOT.jar \
+          --module-path ${{ env.JMOD_HOME }}:mods \
           --add-modules javafx.fxml,javafx.controls,hellofx \
           --output ${{ env.RUNTIME }} \
           --strip-debug --compress 2 --no-header-files --no-man-pages
@@ -213,9 +247,11 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cd modular\maven\hellofx
-          mvn -q package
+          $SOURCES = Get-ChildItem -Name -Filter *.java -Recurse $pwd
+          javac --module-path "${{ env.JMOD_HOME }}" -d mods $SOURCES
+          Copy-Item -Force -Path "src\main\resources\*" -Destination "mods" -Recurse
           ${{ env.JAVA_HOME }}\bin\jlink `
-          --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
+          --module-path "${{ env.JMOD_HOME }};mods" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
           --output ${{ env.RUNTIME }} `
           --strip-debug --compress 2 --no-header-files --no-man-pages
@@ -229,9 +265,10 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cd modular/maven/hellofx
-          mvn -q package
+          javac --module-path ${{ env.JMOD_HOME }} -d mods $(find src -name "*.java")
+          cp -r src/main/resources/* mods
           ${{ env.JAVA_HOME }}/bin/jlink \
-          --module-path ${{ env.JMOD_HOME }}:target/hellofx-1.0-SNAPSHOT.jar \
+          --module-path ${{ env.JMOD_HOME }}:mods \
           --add-modules javafx.fxml,javafx.controls,hellofx \
           --output ${{ env.RUNTIME }} \
           --strip-debug --compress 2 --no-header-files --no-man-pages
