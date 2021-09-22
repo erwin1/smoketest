@@ -247,7 +247,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cd modular\maven\hellofx
-          dir /s /b src\*.java > sources.txt & javac --module-path "${{ env.JMOD_HOME }}" -d mods @sources.txt & del sources.txt
+          cmd dir /s /b src\*.java > sources.txt & javac --module-path "${{ env.JMOD_HOME }}" -d mods @sources.txt & del sources.txt
           Copy-Item -Path "src\main\resources\*" -Destination "mods" -Recurse
           ${{ env.JAVA_HOME }}\bin\jlink `
           --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
