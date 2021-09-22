@@ -251,7 +251,7 @@ jobs:
           javac --module-path "${{ env.JMOD_HOME }}" -d mods $SOURCES
           Copy-Item -Force -Path "src\main\resources\*" -Destination "mods" -Recurse
           ${{ env.JAVA_HOME }}\bin\jlink `
-          --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
+          --module-path "${{ env.JMOD_HOME }};mods" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
           --output ${{ env.RUNTIME }} `
           --strip-debug --compress 2 --no-header-files --no-man-pages
