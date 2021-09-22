@@ -20,6 +20,7 @@ public class HelloFX extends Application {
         stage.setScene(scene);
         stage.show();
 
+        System.out.println(l.getText());
         if (System.getProperty("javafx.platform") == null) {
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
             pause.setOnFinished(f -> {
