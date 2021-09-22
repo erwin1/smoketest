@@ -14,7 +14,7 @@ javafx {
     if (project.hasProperty('sdk')) {
         sdk = project.property('sdk')
     } else {
-        version = project.hasProperty('maven_version') ? project.property('maven_version') : '17'
+        version = project.hasProperty('javafx_version') ? project.property('javafx_version') : '17'
     }
     modules = [ 'javafx.controls' ]
 }
