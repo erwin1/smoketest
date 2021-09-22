@@ -71,7 +71,7 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           cd ${{ matrix.type }}/gradle/hellofx
-          gradle run -Pstaging=${{ env.staging_url }} -Pjavafx_version=${{ env.maven_version }}
+          gradle run -Pstaging=${{ env.staging_url }} -Pjavafx_version="${{ env.maven_version }}"
         env:
           staging_url: ${{ steps.staging.outputs.staging_url }}
           maven_version: ${{ steps.staging.outputs.maven_version }}
