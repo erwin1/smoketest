@@ -247,7 +247,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cd modular\maven\hellofx
-          $SOURCES = dir /s /b src\*.java
+          $SOURCES = Get-ChildItem -Name -Filter *.java -Recurse $pwd
           javac --module-path "${{ env.JMOD_HOME }}" -d mods $SOURCES
           Copy-Item -Path "src\main\resources\*" -Destination "mods" -Recurse
           ${{ env.JAVA_HOME }}\bin\jlink `
