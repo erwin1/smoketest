@@ -249,7 +249,7 @@ jobs:
           cd modular\maven\hellofx
           $SOURCES = Get-ChildItem -Name -Filter *.java -Recurse $pwd
           javac --module-path "${{ env.JMOD_HOME }}" -d mods $SOURCES
-          Copy-Item -Path "src\main\resources\*" -Destination "mods" -Recurse
+          Copy-Item -Force -Path "src\main\resources\*" -Destination "mods" -Recurse
           ${{ env.JAVA_HOME }}\bin\jlink `
           --module-path "${{ env.JMOD_HOME }};target\hellofx-1.0-SNAPSHOT.jar" `
           --add-modules javafx.fxml,javafx.controls,hellofx `
